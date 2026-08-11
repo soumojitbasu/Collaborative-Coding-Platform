@@ -22,6 +22,7 @@ const socketAuthMiddleware = (socket, next) => {
         );
 
         socket.user = decoded;
+        console.log(decoded);
 
         next();
 

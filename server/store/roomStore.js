@@ -1,3 +1,12 @@
 const rooms = new Map();
 
-module.exports = rooms;
+// userId -> timeout
+const disconnectTimers = new Map();
+
+module.exports = {
+
+    rooms,
+
+    disconnectTimers
+
+};

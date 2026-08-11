@@ -1,5 +1,5 @@
 const {nanoid} = require("nanoid");
-const rooms=require("../store/roomStore");
+const {rooms}=require("../store/roomStore");
 const createRoomController=(req,res)=>{
   try{
     const roomId=nanoid(10);

@@ -14,13 +14,13 @@ function RoomPage() {
 
     useEffect(() => {
 
-        if (!socket.connected) {
-
-            socket.connect();
-
-        }
 
         function handleConnect() {
+
+            console.log("Socket Connected");
+            console.log(socket.id);
+
+            console.log("Emitting join-room");
 
             socket.emit("join-room", roomId);
 
@@ -65,12 +65,36 @@ function RoomPage() {
             });
 
         }
+        function handleUserLeft(userId) {
+
+                setParticipants(prev =>
+
+                    prev.filter(
+
+                        participant => participant.userId !== userId
+
+                    )
+
+                );
+
+            }
+        if (socket.connected) {
+
+                handleConnect();
+
+            } else {
+
+                socket.connect();
+
+            }
 
         socket.on("connect", handleConnect);
 
         socket.on("joined-room", handleJoinedRoom);
 
         socket.on("user-joined", handleUserJoined);
+        
+        socket.on("user-left", handleUserLeft);
 
         return () => {
 
@@ -79,6 +103,8 @@ function RoomPage() {
             socket.off("joined-room", handleJoinedRoom);
 
             socket.off("user-joined", handleUserJoined);
+
+            socket.off("user-left", handleUserLeft);
 
         };
 

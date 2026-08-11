@@ -1,4 +1,4 @@
-const rooms = require("../store/roomStore");
+const {rooms,disconnectTimers} = require("../store/roomStore");
 
 const joinRoomController = async (req, res) => {
     try {
@@ -31,8 +31,9 @@ const joinRoomController = async (req, res) => {
 
         room.participants.push({
             userId: req.user.id,
-            username: req.user.username,
-            socketId: null
+            email: req.user.email,
+            socketId: null,
+            joinedAt: new Date()
         });
 
         return res.status(200).json({

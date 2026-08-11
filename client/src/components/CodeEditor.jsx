@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState,useCallback } from "react";
 import Editor from "@monaco-editor/react";
 import socket from "../socket/socket";
 
@@ -8,7 +8,7 @@ function CodeEditor({ roomId, initialCode }) {
 
     const isRemoteUpdate = useRef(false);
     const debounceTimer = useRef(null);
-
+    const throttleTimer = useRef(null);
     // Update editor when server sends latest room state
     useEffect(() => {
 
@@ -17,6 +17,7 @@ function CodeEditor({ roomId, initialCode }) {
     }, [initialCode]);
 
     // Listen for code updates from other users
+
     useEffect(() => {
 
         function handleCodeUpdate(newCode) {
@@ -28,10 +29,24 @@ function CodeEditor({ roomId, initialCode }) {
         }
 
         socket.on("code-update", handleCodeUpdate);
+        function handleCursorUpdate(data) {
+
+                console.log(
+
+                    "Remote Cursor",
+
+                    data
+
+                );
+
+            }
+            socket.on("cursor-update",handleCursorUpdate);
 
         return () => {
 
             socket.off("code-update", handleCodeUpdate);
+
+            socket.off("cursor-update", handleCursorUpdate);
 
         };
 
@@ -76,6 +91,45 @@ function CodeEditor({ roomId, initialCode }) {
         }, 100);
 
     }
+    const handleEditorMount = useCallback((editor) => {
+
+    editor.onDidChangeCursorPosition((event) => {
+
+        if (throttleTimer.current) {
+
+            return;
+
+        }
+
+        throttleTimer.current = setTimeout(() => {
+
+            throttleTimer.current = null;
+
+        }, 50);
+
+        socket.emit(
+
+            "cursor-change",
+
+            {
+
+                roomId,
+
+                lineNumber:
+
+                    event.position.lineNumber,
+
+                column:
+
+                    event.position.column
+
+            }
+
+        );
+
+    });
+
+}, [roomId]);
 
     return (
 
@@ -84,6 +138,7 @@ function CodeEditor({ roomId, initialCode }) {
             defaultLanguage="cpp"
             value={code}
             onChange={handleEditorChange}
+            onMount={handleEditorMount}
         />
 
     );
