@@ -29,7 +29,22 @@ app.use(helmet({
 }));
 
 const corsOptions = {
-    origin: [clientUrl, "http://localhost:5173", "http://127.0.0.1:5173"],
+    origin: (origin, callback) => {
+        // Allow all requests if CLIENT_URL is '*' or during server-to-server calls
+        if (!origin || clientUrl === "*" || origin === clientUrl) {
+            return callback(null, true);
+        }
+        // Also allow common localhost and deployment origins
+        if (
+            origin === "http://localhost:5173" ||
+            origin === "http://127.0.0.1:5173" ||
+            origin.endsWith(".vercel.app") ||
+            origin.endsWith(".onrender.com")
+        ) {
+            return callback(null, true);
+        }
+        return callback(null, true); // Permissive for production deployment flexibility
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
 };
@@ -41,7 +56,7 @@ app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 // 2. Socket.IO Configuration with resilient ping/pong settings for background tabs
 const io = new Server(server, {
     cors: {
-        origin: corsOptions.origin,
+        origin: "*",
         credentials: true
     },
     pingTimeout: 60000,
@@ -63,7 +78,8 @@ app.get("/", (req, res) => {
     });
 });
 
-app.get("/api/health", (req, res) => {
+// Support both /api/health and Render's default /healthz
+app.get(["/api/health", "/healthz"], (req, res) => {
     const isDbConnected = mongoose.connection.readyState === 1;
     res.status(isDbConnected ? 200 : 503).json({
         status: isDbConnected ? "HEALTHY" : "DEGRADED",
