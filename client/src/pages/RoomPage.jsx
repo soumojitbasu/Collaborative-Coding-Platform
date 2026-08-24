@@ -77,7 +77,55 @@ function RoomPage() {
 
                 );
 
-            }
+        }
+        function handleParticipantTyping({ userId }) {
+
+                    setParticipants(prev =>
+
+                        prev.map(participant =>
+
+                            participant.userId === userId
+
+                                ? {
+
+                                    ...participant,
+
+                                    typing: true
+
+                                }
+
+                                : participant
+
+                        )
+
+                    );
+
+        }
+
+        function handleParticipantStopTyping({ userId }) {
+
+                setParticipants(prev =>
+
+                    prev.map(participant =>
+
+                        participant.userId === userId
+
+                            ? {
+
+                                ...participant,
+
+                                typing: false
+
+                            }
+
+                            : participant
+
+                    )
+
+                );
+
+        }
+
         if (socket.connected) {
 
                 handleConnect();

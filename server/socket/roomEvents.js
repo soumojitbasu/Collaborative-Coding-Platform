@@ -140,24 +140,14 @@ function registerRoomEvents(io, socket) {
         );
 
     });
-    // ------------------------
-    // Cursor Sync
-    // ------------------------
-    socket.on("cursor-change", (data) => {
 
-            const {
+    // =====================================
+    // CURSOR SYNC
+    // =====================================
 
-                roomId,
-                lineNumber,
-                column
+    socket.on("cursor-change", ({ roomId, lineNumber, column }) => {
 
-            } = data;
-
-            if (!rooms.has(roomId)) {
-
-                return;
-
-            }
+        if (!rooms.has(roomId)) return;
 
             socket.to(roomId).emit(
 
