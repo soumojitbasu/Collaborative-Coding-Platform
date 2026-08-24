@@ -34,7 +34,6 @@ const corsOptions = {
         if (!origin || clientUrl === "*" || origin === clientUrl) {
             return callback(null, true);
         }
-        // Also allow common localhost and deployment origins
         if (
             origin === "http://localhost:5173" ||
             origin === "http://127.0.0.1:5173" ||
@@ -43,7 +42,7 @@ const corsOptions = {
         ) {
             return callback(null, true);
         }
-        return callback(null, true); // Permissive for production deployment flexibility
+        return callback(null, true);
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
@@ -107,7 +106,7 @@ const startServer = async () => {
     try {
         await connectDB();
 
-        server.listen(PORT, () => {
+        server.listen(PORT, "0.0.0.0", () => {
             console.log(`🚀 CodeSync Server running in ${process.env.NODE_ENV || "development"} mode on port ${PORT}`);
         });
     } catch (err) {
