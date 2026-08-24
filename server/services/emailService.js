@@ -8,17 +8,21 @@ if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS
-        }
+        },
+        connectionTimeout: 3500,
+        greetingTimeout: 3500,
+        socketTimeout: 5000
     });
 }
 
 const sendEmail = async (to, subject, text) => {
+    // Log clearly to server logs for instant debugging and demoing
+    console.log(`\n📧 [EMAIL DISPATCH] To: ${to} | Subject: ${subject}`);
+    console.log(`--------------------------------------------------\n${text}\n--------------------------------------------------`);
+
     try {
         if (!transporter) {
-            console.warn(`\n[EMAIL SERVICE NOT CONFIGURED] Simulated email:`);
-            console.warn(`To: ${to}`);
-            console.warn(`Subject: ${subject}`);
-            console.warn(`Content: ${text}\n`);
+            console.warn(`[EMAIL NOTICE] EMAIL_USER or EMAIL_PASS not set. Using simulated delivery.`);
             return { messageId: "simulated-" + Date.now() };
         }
 
@@ -29,10 +33,10 @@ const sendEmail = async (to, subject, text) => {
             text
         });
 
+        console.log(`✅ Email delivered successfully to ${to}`);
         return info;
     } catch (err) {
-        console.error("Failed to send email via SMTP:", err.message);
-        // Do not crash registration or reset in development/test environments
+        console.error(`⚠️ Email delivery failed to ${to}:`, err.message);
         return { error: err.message };
     }
 };

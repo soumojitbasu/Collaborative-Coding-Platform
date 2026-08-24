@@ -36,10 +36,13 @@ const registerController = async (req, res) => {
         // Check Existing User
         const existingUser = await User.findOne({ email: normalizedEmail });
 
-        // Hash Password
-        const hashedPassword = await bcrypt.hash(password, 10);
+        // Hash Password & OTP in parallel
+        const [hashedPassword, hashedOTP] = await Promise.all([
+            bcrypt.hash(password, 10),
+            bcrypt.hash(generateOTP(), 10)
+        ]);
+
         const otp = generateOTP();
-        const hashedOTP = await bcrypt.hash(otp, 10);
         const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
 
         if (existingUser) {
@@ -50,7 +53,7 @@ const registerController = async (req, res) => {
                 });
             }
 
-            // If user previously registered but never verified, update password and send fresh OTP
+            // Update unverified user with fresh credentials
             existingUser.password = hashedPassword;
             existingUser.otp = hashedOTP;
             existingUser.otpExpires = otpExpires;
@@ -68,18 +71,16 @@ const registerController = async (req, res) => {
             });
         }
 
-        // Attempt Email Delivery
-        try {
-            await sendEmail(
-                normalizedEmail,
-                "Verify Your CodeSync Account",
-                `Welcome to CodeSync!\n\nYour 6-digit email verification code is: ${otp}\n\nThis code expires in 10 minutes. If you did not sign up for an account, please ignore this email.`
-            );
-        } catch (emailErr) {
-            console.error("Failed to send verification email:", emailErr.message);
-            // In development or when SMTP is not configured, still return success with dev note in logs
-        }
+        // Dispatch Email Asynchronously without blocking the HTTP response
+        sendEmail(
+            normalizedEmail,
+            "Verify Your CodeSync Account",
+            `Welcome to CodeSync!\n\nYour 6-digit email verification code is: ${otp}\n\nThis code expires in 10 minutes. If you did not sign up for an account, please ignore this email.`
+        ).catch((err) => {
+            console.error("Async email dispatch error:", err.message);
+        });
 
+        // Return immediate response to the client (< 50ms)
         return res.status(201).json({
             success: true,
             message: "Registration successful! A verification code has been sent to your email.",
