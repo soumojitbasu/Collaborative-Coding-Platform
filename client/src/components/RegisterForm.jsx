@@ -46,7 +46,10 @@ function RegisterForm() {
             success(data.message || "Registration successful! Check your email for your verification code.");
 
             navigate("/verify-otp", {
-                state: { email: formData.email }
+                state: {
+                    email: formData.email,
+                    devOtp: data.devOtp
+                }
             });
         } catch (err) {
             showError(err.response?.data?.message || "Registration failed. Please try again.");
@@ -105,7 +108,14 @@ function RegisterForm() {
                 style={{ width: "100%", marginTop: "8px" }}
                 disabled={loading}
             >
-                {loading ? "Creating Account..." : "Create Free Account"}
+                {loading ? (
+                    <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+                        <span className="spinner-sm"></span>
+                        <span>Creating Account...</span>
+                    </span>
+                ) : (
+                    "Create Free Account"
+                )}
             </button>
 
             <div className="auth-footer-links">

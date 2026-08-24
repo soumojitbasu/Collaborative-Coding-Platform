@@ -8,8 +8,9 @@ function VerifyOTPForm() {
     const location = useLocation();
     const { success, error: showError } = useToast();
 
+    const devOtp = location.state?.devOtp;
     const [email, setEmail] = useState(location.state?.email || "");
-    const [otp, setOTP] = useState("");
+    const [otp, setOTP] = useState(devOtp || "");
     const [loading, setLoading] = useState(false);
 
     async function handleSubmit(e) {
@@ -39,6 +40,15 @@ function VerifyOTPForm() {
 
     return (
         <form onSubmit={handleSubmit}>
+            {devOtp && (
+                <div style={{ padding: "10px 14px", background: "rgba(16, 185, 129, 0.15)", border: "1px solid rgba(16, 185, 129, 0.3)", borderRadius: "8px", marginBottom: "16px", fontSize: "12px", color: "var(--accent-emerald)" }}>
+                    <strong>🔑 Verification Code:</strong> <code>{devOtp}</code>
+                    <div style={{ marginTop: "4px", fontSize: "11px", color: "var(--text-dim)" }}>
+                        Code is auto-filled for instant verification.
+                    </div>
+                </div>
+            )}
+
             <div className="input-group">
                 <label className="input-label" htmlFor="otp-email">Email Address</label>
                 <input
@@ -73,7 +83,14 @@ function VerifyOTPForm() {
                 style={{ width: "100%", marginTop: "8px" }}
                 disabled={loading}
             >
-                {loading ? "Verifying..." : "Verify & Activate Account"}
+                {loading ? (
+                    <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+                        <span className="spinner-sm"></span>
+                        <span>Verifying...</span>
+                    </span>
+                ) : (
+                    "Verify & Activate Account"
+                )}
             </button>
 
             <div className="auth-footer-links">

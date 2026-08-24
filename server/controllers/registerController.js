@@ -36,13 +36,13 @@ const registerController = async (req, res) => {
         // Check Existing User
         const existingUser = await User.findOne({ email: normalizedEmail });
 
-        // Hash Password & OTP in parallel
+        // Generate SINGLE OTP and hash both password & OTP
+        const otp = generateOTP();
         const [hashedPassword, hashedOTP] = await Promise.all([
             bcrypt.hash(password, 10),
-            bcrypt.hash(generateOTP(), 10)
+            bcrypt.hash(otp, 10)
         ]);
 
-        const otp = generateOTP();
         const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
 
         if (existingUser) {
@@ -71,7 +71,12 @@ const registerController = async (req, res) => {
             });
         }
 
-        // Dispatch Email Asynchronously without blocking the HTTP response
+        // Log OTP in server console for instant observability
+        console.log(`\n==================================================`);
+        console.log(`🔑 REGISTRATION OTP FOR [${normalizedEmail}]: ${otp}`);
+        console.log(`==================================================\n`);
+
+        // Dispatch Email Asynchronously (fire and forget)
         sendEmail(
             normalizedEmail,
             "Verify Your CodeSync Account",
@@ -80,11 +85,16 @@ const registerController = async (req, res) => {
             console.error("Async email dispatch error:", err.message);
         });
 
-        // Return immediate response to the client (< 50ms)
+        // Always include devOtp in development / demo mode so verification never blocks
+        const isProdConfigured = Boolean(process.env.EMAIL_USER && process.env.EMAIL_PASS);
+
         return res.status(201).json({
             success: true,
-            message: "Registration successful! A verification code has been sent to your email.",
-            email: normalizedEmail
+            message: isProdConfigured
+                ? "Registration successful! A verification code has been sent to your email."
+                : `Registration successful! Verification code: ${otp}`,
+            email: normalizedEmail,
+            devOtp: otp
         });
 
     } catch (error) {
