@@ -1,4 +1,4 @@
-# SyncForge (CodeSync) — Collaborative Coding Platform 🚀
+# SyncForge — Collaborative Coding Platform 🚀
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-Vercel-black?style=for-the-badge&logo=vercel)](https://syncforge-basu3.vercel.app)
 [![Backend API](https://img.shields.io/badge/Backend_API-Render-46e3b7?style=for-the-badge&logo=render)](https://syncforge-server.onrender.com)
