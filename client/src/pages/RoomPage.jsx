@@ -286,10 +286,10 @@ function RoomPage() {
         }
     }
 
-    function handleCopyInvite() {
-        const inviteUrl = `${window.location.origin}/room/${roomId}`;
-        navigator.clipboard.writeText(inviteUrl);
-        success("Invite URL copied to clipboard! Share it with your peers.");
+    function handleCopyRoomId() {
+        if (!roomId) return;
+        navigator.clipboard.writeText(roomId);
+        success(`Room ID "${roomId}" copied to clipboard!`);
     }
 
     function handleLeaveRoom() {
@@ -309,11 +309,11 @@ function RoomPage() {
                         <span className="room-title-text">{roomTitle}</span>
                         <div
                             className="room-id-pill"
-                            onClick={handleCopyInvite}
-                            title="Click to copy invite link"
+                            onClick={handleCopyRoomId}
+                            title="Click to copy Room ID"
                         >
-                            <span>🔗 {roomId}</span>
-                            <span style={{ fontSize: "10px", opacity: 0.8 }}>(Copy)</span>
+                            <span>📋 {roomId}</span>
+                            <span style={{ fontSize: "10px", opacity: 0.8 }}>(Copy ID)</span>
                         </div>
                     </div>
                 </div>
