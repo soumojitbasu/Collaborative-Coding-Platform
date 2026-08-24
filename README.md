@@ -1,8 +1,20 @@
-# CodeSync — Production Collaborative Coding Platform 🚀
+# SyncForge (CodeSync) — Collaborative Coding Platform 🚀
 
-A real-time, multi-user collaborative development environment built with **React 19, Monaco Editor, Node.js, Express, Socket.IO, and MongoDB**.
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Vercel-black?style=for-the-badge&logo=vercel)](https://syncforge-basu3.vercel.app)
+[![Backend API](https://img.shields.io/badge/Backend_API-Render-46e3b7?style=for-the-badge&logo=render)](https://syncforge-server.onrender.com)
+[![License](https://img.shields.io/badge/License-ISC-blue?style=for-the-badge)](LICENSE)
 
-CodeSync allows developers, interviewers, and study groups to create instant collaborative workspaces, write code simultaneously with live remote cursors, communicate via real-time in-room chat, and execute programs across 8+ programming languages in a secure sandboxed environment.
+A production-grade, real-time, multi-user collaborative development environment built with **React 19, Monaco Editor, Node.js, Express, Socket.IO, and MongoDB**.
+
+SyncForge allows developers, interviewers, and study groups to create instant collaborative workspaces, write code simultaneously with live remote cursors, communicate via real-time in-room chat, and execute programs across 8+ programming languages with synchronized terminal STDIN & STDOUT in a secure sandboxed environment.
+
+---
+
+## 🌐 Live Production Links
+
+* **🚀 Live Frontend App**: [https://syncforge-basu3.vercel.app](https://syncforge-basu3.vercel.app)
+* **⚡ Live Backend API**: [https://syncforge-server.onrender.com](https://syncforge-server.onrender.com)
+* **🩺 API Health Check**: [https://syncforge-server.onrender.com/api/health](https://syncforge-server.onrender.com/api/health)
 
 ---
 
@@ -43,8 +55,9 @@ CodeSync allows developers, interviewers, and study groups to create instant col
 
 - **⚡ Real-Time Collaborative Editor**: Built on Microsoft's Monaco Editor engine (the core of VS Code) with sub-50ms synchronized typing.
 - **🎨 Dynamic Remote Cursors**: See remote collaborators' cursor positions and selections in real-time with assigned participant colors and name tags.
-- **🛡️ Multi-Language Execution**: Execute **C++, Python, JavaScript, TypeScript, Java, Go, Rust, and C#** with custom STDIN stream inputs and resource caps.
-- **💬 Integrated In-Room Chat**: Real-time room chat with user color tagging, message timestamps, and animated "X is typing..." status indicators.
+- **🎛️ 2D Resizable LeetCode Layout**: Multi-directional draggable splitters to adjust editor width, terminal height, and participants/chat sidebar.
+- **🛡️ Multi-Language Execution & Synced Terminal**: Execute **C++, Python (3.12), JavaScript, TypeScript, Java, Go, Rust, and C#** with live synchronized STDIN & STDOUT streams across all peers in the room.
+- **💬 Integrated In-Room Chat**: Real-time room chat with dedicated typing status indicators ("Soumojit is typing...").
 - **🔒 Production-Grade Security**:
   - Cryptographically secure 6-digit numeric OTP generation (`crypto.randomInt`).
   - Strict OTP attempt rate limiting (max 5 attempts before invalidation).
@@ -64,6 +77,7 @@ Collaborative coding platform/
 ├── README.md                     # Comprehensive project documentation
 │
 ├── client/                       # React 19 Frontend SPA (Vite)
+│   ├── vercel.json               # Vercel SPA routing rewrite rules
 │   ├── Dockerfile                # Production multi-stage Nginx Dockerfile
 │   ├── nginx.conf                # Nginx SPA fallback configuration
 │   ├── src/
@@ -95,24 +109,24 @@ Collaborative coding platform/
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Getting Started Locally
 
 ### Prerequisites
 - **Node.js**: v18.0.0 or later
 - **MongoDB**: Local instance or MongoDB Atlas URI
-- **Docker & Docker Compose** (Optional, for containerized run)
+- **Docker & Docker Compose** (Optional)
 
 ---
 
-### Option 1: Quickstart with Docker Compose (Recommended)
+### Option 1: Quickstart with Docker Compose
 
 1. Clone repository and navigate to root:
 ```bash
-git clone <repo-url>
-cd "Collaborative coding platform"
+git clone https://github.com/soumojitbasu/Collaborative-Coding-Platform.git
+cd Collaborative-Coding-Platform
 ```
 
-2. Launch all services (MongoDB, Server, and Client) with Docker Compose:
+2. Launch all services with Docker Compose:
 ```bash
 docker-compose up --build
 ```
@@ -142,8 +156,6 @@ JWT_EXPIRES_IN=24h
 CLIENT_URL=http://localhost:5173
 EMAIL_USER=your_email@gmail.com
 EMAIL_PASS=your_gmail_app_password
-JUDGE0_API_KEY=YOUR_RAPIDAPI_KEY_OPTIONAL
-JUDGE0_API_URL=https://judge0-ce.p.rapidapi.com
 ```
 
 Start backend development server:
@@ -203,14 +215,19 @@ npm run dev
 | Event Name | Direction | Payload | Description |
 | :--- | :--- | :--- | :--- |
 | `join-room` | Client ➔ Server | `roomId` | Join a collaborative room session |
-| `joined-room` | Server ➔ Client | `{ roomId, participants, code, language, messages }` | Initial room state snapshot |
+| `joined-room` | Server ➔ Client | `{ roomId, participants, code, language, stdin, output, status, messages }` | Initial room state snapshot |
 | `code-change` | Client ➔ Server | `{ roomId, code }` | Broadcast live code update |
 | `code-update` | Server ➔ Client | `code` | Receive latest code text |
+| `stdin-change` | Client ➔ Server | `{ roomId, stdin }` | Broadcast live standard input update |
+| `stdin-update` | Server ➔ Client | `stdin` | Synchronize input across all peers |
+| `execution-start`| Client ➔ Server | `{ roomId }` | Signal execution initiated |
+| `execution-result`| Client ➔ Server | `{ roomId, output, status, metrics }` | Broadcast output & metrics |
 | `cursor-change` | Client ➔ Server | `{ roomId, lineNumber, column }` | Broadcast cursor position |
 | `cursor-update` | Server ➔ Client | `{ userId, displayName, color, lineNumber, column }` | Render remote collaborator cursor |
-| `typing-start` | Client ➔ Server | `{ roomId }` | Signal participant started typing |
-| `typing-stop` | Client ➔ Server | `{ roomId }` | Signal participant stopped typing |
-| `language-change` | Client ➔ Server | `{ roomId, language }` | Synchronize room programming language |
+| `typing-start` | Client ➔ Server | `{ roomId }` | Signal participant typing in editor |
+| `typing-stop` | Client ➔ Server | `{ roomId }` | Signal participant stopped typing in editor |
+| `chat-typing-start` | Client ➔ Server | `{ roomId }` | Signal participant typing in chat |
+| `chat-typing-stop` | Client ➔ Server | `{ roomId }` | Signal participant stopped typing in chat |
 | `send-message` | Client ➔ Server | `{ roomId, message }` | Send chat message to room participants |
 | `chat-message` | Server ➔ Client | `{ id, displayName, color, message, timestamp }` | Receive live chat message |
 | `user-left` | Server ➔ Client | `userId` | Participant disconnected or left session |
@@ -224,7 +241,7 @@ npm run dev
 3. **No User Account Enumeration**: Forgot password endpoints return constant-time generic confirmation messages regardless of email existence.
 4. **Brute Force Protection**: IP rate limiting via `express-rate-limit` and maximum attempt counters on OTP verification.
 5. **No Secret Leaks**: Sanitized loggers with zero token or credential output.
-6. **Graceful Disconnection**: 30-second reconnection window prevents unexpected session drops during brief network drops.
+6. **Graceful Disconnection**: 60-second reconnection window prevents unexpected session drops during brief network drops.
 
 ---
 
