@@ -4,39 +4,50 @@ let transporter = null;
 
 if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
     transporter = nodemailer.createTransport({
-        service: "gmail",
+        host: "smtp.gmail.com",
+        port: 465,
+        secure: true,
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS
         },
-        connectionTimeout: 3500,
-        greetingTimeout: 3500,
-        socketTimeout: 5000
+        connectionTimeout: 2500,
+        greetingTimeout: 2500,
+        socketTimeout: 3000
     });
 }
 
 const sendEmail = async (to, subject, text) => {
-    // Log clearly to server logs for instant debugging and demoing
-    console.log(`\n📧 [EMAIL DISPATCH] To: ${to} | Subject: ${subject}`);
-    console.log(`--------------------------------------------------\n${text}\n--------------------------------------------------`);
+    // Prominently log OTP to server console
+    console.log(`\n==================================================`);
+    console.log(`📧 [EMAIL DISPATCH] To: ${to}`);
+    console.log(`📋 [SUBJECT]: ${subject}`);
+    console.log(`📝 [CONTENT]:\n${text}`);
+    console.log(`==================================================\n`);
+
+    if (!transporter) {
+        console.warn(`[EMAIL NOTICE] EMAIL_USER / EMAIL_PASS not configured. Simulated delivery logged above.`);
+        return { messageId: "simulated-" + Date.now() };
+    }
 
     try {
-        if (!transporter) {
-            console.warn(`[EMAIL NOTICE] EMAIL_USER or EMAIL_PASS not set. Using simulated delivery.`);
-            return { messageId: "simulated-" + Date.now() };
-        }
-
-        const info = await transporter.sendMail({
+        // Enforce hard 2.5-second timeout on sendMail
+        const emailPromise = transporter.sendMail({
             from: process.env.EMAIL_USER,
             to,
             subject,
             text
         });
 
+        const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("SMTP connection timed out after 2.5s")), 2500)
+        );
+
+        const info = await Promise.race([emailPromise, timeoutPromise]);
         console.log(`✅ Email delivered successfully to ${to}`);
         return info;
     } catch (err) {
-        console.error(`⚠️ Email delivery failed to ${to}:`, err.message);
+        console.error(`⚠️ Email delivery skipped/timed out for ${to}:`, err.message);
         return { error: err.message };
     }
 };
