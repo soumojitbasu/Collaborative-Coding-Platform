@@ -3,68 +3,95 @@ const User = require("../models/User");
 const generateOTP = require("../utils/generateOTP");
 const sendEmail = require("../services/emailService");
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const registerController = async (req, res) => {
     try {
-
         const { email, password } = req.body;
 
         // Validate Input
         if (!email || !password) {
             return res.status(400).json({
-                message: "All fields are required"
+                success: false,
+                message: "Email and password are required"
+            });
+        }
+
+        const normalizedEmail = email.toLowerCase().trim();
+
+        if (!emailRegex.test(normalizedEmail)) {
+            return res.status(400).json({
+                success: false,
+                message: "Please provide a valid email address"
+            });
+        }
+
+        if (password.length < 6) {
+            return res.status(400).json({
+                success: false,
+                message: "Password must be at least 6 characters long"
             });
         }
 
         // Check Existing User
-        const existingUser = await User.findOne({ email });
-
-        if (existingUser) {
-            return res.status(409).json({
-                message: "User already exists"
-            });
-        }
+        const existingUser = await User.findOne({ email: normalizedEmail });
 
         // Hash Password
         const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Generate OTP
         const otp = generateOTP();
-
-        // Hash OTP
         const hashedOTP = await bcrypt.hash(otp, 10);
+        const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
 
-        // OTP Expiry (10 minutes)
-        const otpExpires = new Date(
-            Date.now() + 10 * 60 * 1000
-        );
+        if (existingUser) {
+            if (existingUser.verified) {
+                return res.status(409).json({
+                    success: false,
+                    message: "An account with this email already exists. Please log in."
+                });
+            }
 
-        // Create User
-        await User.create({
-            email,
-            password: hashedPassword,
-            verified: false,
-            otp: hashedOTP,
-            otpExpires,
-            otpAttempts: 0
-        });
+            // If user previously registered but never verified, update password and send fresh OTP
+            existingUser.password = hashedPassword;
+            existingUser.otp = hashedOTP;
+            existingUser.otpExpires = otpExpires;
+            existingUser.otpAttempts = 0;
+            await existingUser.save();
+        } else {
+            // Create New User
+            await User.create({
+                email: normalizedEmail,
+                password: hashedPassword,
+                verified: false,
+                otp: hashedOTP,
+                otpExpires,
+                otpAttempts: 0
+            });
+        }
 
-        // Send OTP Email
-        await sendEmail(
-            email,
-            "Verify Your Email",
-            `Your OTP is ${otp}`
-        );
+        // Attempt Email Delivery
+        try {
+            await sendEmail(
+                normalizedEmail,
+                "Verify Your CodeSync Account",
+                `Welcome to CodeSync!\n\nYour 6-digit email verification code is: ${otp}\n\nThis code expires in 10 minutes. If you did not sign up for an account, please ignore this email.`
+            );
+        } catch (emailErr) {
+            console.error("Failed to send verification email:", emailErr.message);
+            // In development or when SMTP is not configured, still return success with dev note in logs
+        }
 
         return res.status(201).json({
-            message: "Registration successful. Please verify your email."
+            success: true,
+            message: "Registration successful! A verification code has been sent to your email.",
+            email: normalizedEmail
         });
 
     } catch (error) {
-
+        console.error("registerController error:", error);
         return res.status(500).json({
-            message: error.message
+            success: false,
+            message: error.message || "Failed to register user"
         });
-
     }
 };
 

@@ -2,69 +2,63 @@ const bcrypt = require("bcrypt");
 const User = require("../models/User");
 
 const changePasswordController = async (req, res) => {
-
     try {
-
         const { currentPassword, newPassword } = req.body;
 
         if (!currentPassword || !newPassword) {
-
             return res.status(400).json({
-                message: "All fields are required"
+                success: false,
+                message: "Current password and new password are required"
             });
-
         }
 
-        const user = await User.findById(req.user.id);
+        if (newPassword.length < 6) {
+            return res.status(400).json({
+                success: false,
+                message: "New password must be at least 6 characters long"
+            });
+        }
+
+        const user = await User.findById(req.user.id).select("+password");
 
         if (!user) {
-
             return res.status(404).json({
+                success: false,
                 message: "User not found"
             });
-
         }
 
-        const isMatch = await bcrypt.compare(
-            currentPassword,
-            user.password
-        );
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
 
         if (!isMatch) {
-
             return res.status(400).json({
+                success: false,
                 message: "Current password is incorrect"
             });
-
         }
 
-        const hashedPassword = await bcrypt.hash(
-            newPassword,
-            10
-        );
+        if (currentPassword === newPassword) {
+            return res.status(400).json({
+                success: false,
+                message: "New password must be different from your current password"
+            });
+        }
 
-        user.password = hashedPassword;
-
+        user.password = await bcrypt.hash(newPassword, 10);
         await user.save();
 
         return res.status(200).json({
-
-            message: "Password updated successfully"
-
+            success: true,
+            message: "Password changed successfully"
         });
 
-    }
-
-    catch (error) {
-
+    } catch (error) {
+        console.error("changePassword error:", error);
         return res.status(500).json({
-
-            message: error.message
-
+            success: false,
+            message: "Failed to change password. Please try again."
         });
-
     }
-
 };
 
 module.exports = {

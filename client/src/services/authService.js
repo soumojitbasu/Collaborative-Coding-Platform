@@ -1,4 +1,6 @@
 import api from "./api";
+import { removeToken, removeUser } from "../utils/auth";
+import { disconnectSocket } from "../socket/socket";
 
 export async function register(formData) {
     const response = await api.post("/auth/register", formData);
@@ -14,43 +16,29 @@ export async function login(formData) {
     const response = await api.post("/auth/login", formData);
     return response.data;
 }
-export async function forgotPassword(formData){
 
-    const response=await api.post(
-
-        "/auth/forget-password",
-
-        formData
-
-    );
-
+export async function forgotPassword(formData) {
+    const response = await api.post("/auth/forget-password", formData);
     return response.data;
-
 }
 
 export async function resetPassword(formData) {
-
-    const response = await api.post(
-        "/auth/reset-password",
-        formData
-    );
-
+    const response = await api.post("/auth/reset-password", formData);
     return response.data;
 }
 
 export async function getCurrentUser() {
-    return api.get("/auth/me");
+    const response = await api.get("/auth/me");
+    return response.data?.user;
 }
+
 export async function changePassword(formData) {
-
-    const response = await api.post(
-
-        "/auth/change-password",
-
-        formData
-
-    );
-
+    const response = await api.post("/auth/change-password", formData);
     return response.data;
+}
 
+export function logout() {
+    removeToken();
+    removeUser();
+    disconnectSocket();
 }

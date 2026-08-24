@@ -1,42 +1,30 @@
-const {nanoid} = require("nanoid");
-const {rooms}=require("../store/roomStore");
-const createRoomController=(req,res)=>{
-  try{
-    const roomId=nanoid(10);
-    rooms.set(roomId, {
+const { createRoom } = require("../services/roomService");
 
-            roomId,
+const createRoomController = async (req, res) => {
+    try {
+        const { title, language } = req.body || {};
+        const hostId = req.user.id;
 
-            hostId: req.user.id,
-
-            participants: [],
-
-            language: "cpp",
-
-            code: `#include <iostream>
-
-        using namespace std;
-
-        int main() {
-
-            cout << "Welcome to CodeSync!";
-
-            return 0;
-
-        }`,
-
-            createdAt: new Date()
-
+        const room = await createRoom({
+            hostId,
+            title,
+            language
         });
-    console.log(rooms);
-    res.status(200).json(
-      {message:"Room created successfully", roomId}
-    );
-  } catch (error) {
-    console.error("Error creating room:", error);
-    res.status(500).json(
-      {message:"Internal server error"}
-    );
-  }
-}
-module.exports=createRoomController;
+
+        return res.status(201).json({
+            success: true,
+            message: "Room created successfully",
+            roomId: room.roomId,
+            title: room.title,
+            language: room.language
+        });
+    } catch (error) {
+        console.error("Error creating room:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to create room"
+        });
+    }
+};
+
+module.exports = createRoomController;

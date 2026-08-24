@@ -3,62 +3,120 @@ require("dotenv").config();
 const express = require("express");
 const http = require("http");
 const cors = require("cors");
+const helmet = require("helmet");
+const mongoose = require("mongoose");
 const { Server } = require("socket.io");
 
 const connectDB = require("./config/db");
 
 const authRoutes = require("./routes/authRoutes");
 const roomRoutes = require("./routes/roomRoutes");
+const executeRoutes = require("./routes/executeRoutes");
 
 const socketAuthMiddleware = require("./middleware/socketAuthMiddleware");
 const registerSocketHandlers = require("./socket");
+const { generalLimiter } = require("./middleware/rateLimiter");
+const { notFoundHandler, errorHandler } = require("./middleware/errorMiddleware");
 
 const app = express();
 const server = http.createServer(app);
 
+const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+
+// 1. Security Headers & CORS
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+
+const corsOptions = {
+    origin: [clientUrl, "http://localhost:5173", "http://127.0.0.1:5173"],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
+};
+
+app.use(cors(corsOptions));
+app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ extended: true, limit: "1mb" }));
+
+// 2. Socket.IO Configuration with resilient ping/pong settings for background tabs
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:5173",
+        origin: corsOptions.origin,
+        credentials: true
     },
+    pingTimeout: 60000,
+    pingInterval: 25000,
+    connectTimeout: 45000
 });
-
-// Middleware
-app.use(cors());
-app.use(express.json());
-
-// Routes
-app.get("/", (req, res) => {
-    res.send("Authentication API Running...");
-});
-
-app.use("/api/auth", authRoutes);
-app.use("/api/rooms", roomRoutes);
 
 // Socket Authentication
 io.use(socketAuthMiddleware);
 
-// Register all socket events
+// Register Socket.IO Handlers
 registerSocketHandlers(io);
 
-// Start Server
+// 3. Application Health Check & Root Endpoints
+app.get("/", (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: "CodeSync Collaborative API is live and healthy."
+    });
+});
+
+app.get("/api/health", (req, res) => {
+    const isDbConnected = mongoose.connection.readyState === 1;
+    res.status(isDbConnected ? 200 : 503).json({
+        status: isDbConnected ? "HEALTHY" : "DEGRADED",
+        uptime: process.uptime(),
+        timestamp: new Date().toISOString(),
+        database: isDbConnected ? "Connected" : "Disconnected",
+        activeSocketConnections: io.engine.clientsCount
+    });
+});
+
+// 4. API Routes (with general rate limiting)
+app.use("/api/", generalLimiter);
+app.use("/api/auth", authRoutes);
+app.use("/api/rooms", roomRoutes);
+app.use("/api/execute", executeRoutes);
+
+// 5. Error Handling Middleware
+app.use(notFoundHandler);
+app.use(errorHandler);
+
+// 6. Server Initialization & Graceful Shutdown
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
-
     try {
-
         await connectDB();
 
         server.listen(PORT, () => {
-            console.log(`Server running on port ${PORT}`);
+            console.log(`🚀 CodeSync Server running in ${process.env.NODE_ENV || "development"} mode on port ${PORT}`);
         });
-
     } catch (err) {
-
-        console.error(err);
-
+        console.error("❌ Failed to start server:", err);
+        process.exit(1);
     }
-
 };
+
+// Graceful Shutdown
+const handleGracefulShutdown = (signal) => {
+    console.log(`\n🛑 Received ${signal}. Starting graceful shutdown...`);
+    server.close(async () => {
+        console.log("🔒 HTTP server closed.");
+        try {
+            await mongoose.connection.close(false);
+            console.log("💾 MongoDB connection closed.");
+            process.exit(0);
+        } catch (err) {
+            console.error("Error closing MongoDB connection:", err);
+            process.exit(1);
+        }
+    });
+};
+
+process.on("SIGTERM", () => handleGracefulShutdown("SIGTERM"));
+process.on("SIGINT", () => handleGracefulShutdown("SIGINT"));
 
 startServer();

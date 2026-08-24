@@ -1,54 +1,40 @@
-const {rooms,disconnectTimers} = require("../store/roomStore");
+const { getRoom } = require("../services/roomService");
 
 const joinRoomController = async (req, res) => {
     try {
-
         const { roomId } = req.body;
 
-        if (!roomId) {
+        if (!roomId || typeof roomId !== "string") {
             return res.status(400).json({
-                message: "Room ID is required"
+                success: false,
+                message: "A valid Room ID is required"
             });
         }
 
-        if (!rooms.has(roomId)) {
+        const cleanRoomId = roomId.trim();
+        const room = await getRoom(cleanRoomId);
+
+        if (!room) {
             return res.status(404).json({
-                message: "Room not found"
+                success: false,
+                message: "Room not found. Please verify the Room ID or create a new room."
             });
         }
-
-        const room = rooms.get(roomId);
-
-        const alreadyJoined = room.participants.some(
-            participant => participant.userId === req.user.id
-        );
-
-        if (alreadyJoined) {
-            return res.status(200).json({
-                message: "Already in room"
-            });
-        }
-
-        room.participants.push({
-            userId: req.user.id,
-            email: req.user.email,
-            socketId: null,
-            joinedAt: new Date()
-        });
 
         return res.status(200).json({
-            message: "Joined room successfully",
-            roomId
+            success: true,
+            message: "Room found and accessible",
+            roomId: room.roomId,
+            title: room.title,
+            language: room.language
         });
 
     } catch (error) {
-
-        console.error(error);
-
+        console.error("joinRoomController error:", error);
         return res.status(500).json({
-            message: "Internal Server Error"
+            success: false,
+            message: "Internal server error while joining room"
         });
-
     }
 };
 

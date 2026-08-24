@@ -1,5 +1,5 @@
-import { Routes, Route } from "react-router-dom";
-
+import { Routes, Route, Navigate } from "react-router-dom";
+import "./App.css";
 import MainLayout from "./layouts/MainLayout";
 import VerifyOTPPage from "./pages/VerifyOTPPage";
 import LandingPage from "./pages/LandingPage";
@@ -13,48 +13,47 @@ import ChangePasswordPage from "./pages/ChangePasswordPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
-
     return (
-
         <Routes>
+            <Route element={<MainLayout />}>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/verify-otp" element={<VerifyOTPPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
 
-            <Route element={<MainLayout/>}>
+                {/* Authenticated Protected Routes */}
+                <Route
+                    path="/dashboard"
+                    element={
+                        <ProtectedRoute>
+                            <DashboardPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/room/:roomId"
+                    element={
+                        <ProtectedRoute>
+                            <RoomPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/change-password"
+                    element={
+                        <ProtectedRoute>
+                            <ChangePasswordPage />
+                        </ProtectedRoute>
+                    }
+                />
 
-            <Route path="/" element={<LandingPage/>}/>
-
-            <Route path="/register" element={<RegisterPage/>}/>
-
-            <Route path="/verify-otp" element={<VerifyOTPPage/>}/>
-
-            <Route path="/login" element={<LoginPage/>}/>
-
-            <Route path="/dashboard" element={
-                <ProtectedRoute>
-                    <DashboardPage/>
-                </ProtectedRoute>
-            }/>
-
-            <Route path="/room/:roomId" element={
-                <ProtectedRoute>
-                    <RoomPage/>
-                </ProtectedRoute>
-            }/>
-            <Route path="/change-password" element={
-                <ProtectedRoute>
-                    <ChangePasswordPage/>
-                </ProtectedRoute>
-            }/>
-
-            <Route path="/forgot-password" element={<ForgotPasswordPage/>}/>
-
-            <Route path="/reset-password" element={<ResetPasswordPage/>}/>
-
+                {/* Catch-all Wildcard Route */}
+                <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
-
         </Routes>
-
     );
-
 }
 
 export default App;
