@@ -190,6 +190,7 @@ npm run dev
 | :--- | :--- | :--- | :--- |
 | `POST` | `/register` | Register new user and dispatch 6-digit OTP | No (Rate Limited) |
 | `POST` | `/verify-otp` | Verify 6-digit email OTP (Max 5 attempts) | No (Rate Limited) |
+| `POST` | `/resend-otp` | Request a fresh 6-digit verification code | No (Rate Limited) |
 | `POST` | `/login` | Authenticate user & issue JWT bearer token | No (Rate Limited) |
 | `POST` | `/forget-password` | Request 15-minute tokenized password reset link | No (Rate Limited) |
 | `POST` | `/reset-password` | Set new password using URL token verification | No (Rate Limited) |
