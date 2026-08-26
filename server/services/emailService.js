@@ -4,7 +4,6 @@ let transporter = null;
 
 const initTransporter = () => {
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-        // Clean any spaces from EMAIL_PASS (Google App Passwords have spaces like 'xxxx yyyy zzzz wwww')
         const cleanPass = process.env.EMAIL_PASS.replace(/\s+/g, "");
         const cleanUser = process.env.EMAIL_USER.trim();
 
@@ -23,7 +22,7 @@ const initTransporter = () => {
 
 initTransporter();
 
-const sendEmail = async (to, subject, text) => {
+const sendEmail = async (to, subject, text, html = null) => {
     console.log(`\n==================================================`);
     console.log(`📧 [EMAIL DISPATCH] To: ${to}`);
     console.log(`📋 [SUBJECT]: ${subject}`);
@@ -41,13 +40,15 @@ const sendEmail = async (to, subject, text) => {
 
     try {
         const cleanUser = process.env.EMAIL_USER.trim();
-        const info = await transporter.sendMail({
-            from: `"CodeSync" <${cleanUser}>`,
-            to,
-            subject,
-            text
-        });
+        const mailOptions = {
+            from: `"CodeSync Support" <${cleanUser}>`,
+            to: to.trim(),
+            subject: subject.trim(),
+            text: text,
+            ...(html ? { html } : {})
+        };
 
+        const info = await transporter.sendMail(mailOptions);
         console.log(`✅ Email delivered successfully to ${to} (Message ID: ${info.messageId})`);
         return info;
     } catch (err) {
