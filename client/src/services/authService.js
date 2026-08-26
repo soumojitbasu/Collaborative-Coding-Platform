@@ -12,6 +12,11 @@ export async function verifyOTP(formData) {
     return response.data;
 }
 
+export async function resendOTP(formData) {
+    const response = await api.post("/auth/resend-otp", formData);
+    return response.data;
+}
+
 export async function login(formData) {
     const response = await api.post("/auth/login", formData);
     return response.data;

@@ -1,6 +1,7 @@
 const express = require("express");
 const { registerController } = require("../controllers/registerController");
 const { verifyOTPController } = require("../controllers/verifyOTPController");
+const { resendOTPController } = require("../controllers/resendOTPController");
 const { loginController } = require("../controllers/loginController");
 const { forgotPasswordController } = require("../controllers/forgotPasswordController");
 const { resetPasswordController } = require("../controllers/resetPasswordController");
@@ -16,6 +17,7 @@ const router = express.Router();
 // Public Authentication Endpoints (Rate Limited)
 router.post("/register", authLimiter, registerController);
 router.post("/verify-otp", authLimiter, verifyOTPController);
+router.post("/resend-otp", authLimiter, resendOTPController);
 router.post("/login", authLimiter, loginController);
 router.post("/forget-password", authLimiter, forgotPasswordController);
 router.post("/reset-password", authLimiter, resetPasswordController);
