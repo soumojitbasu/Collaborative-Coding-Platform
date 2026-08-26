@@ -71,12 +71,12 @@ const registerController = async (req, res) => {
             });
         }
 
-        // Log OTP in server console for instant observability
+        // Log OTP in server console for observability
         console.log(`\n==================================================`);
         console.log(`🔑 REGISTRATION OTP FOR [${normalizedEmail}]: ${otp}`);
         console.log(`==================================================\n`);
 
-        // Dispatch Email Asynchronously (fire and forget)
+        // Dispatch Email Asynchronously
         sendEmail(
             normalizedEmail,
             "Verify Your CodeSync Account",
@@ -85,16 +85,14 @@ const registerController = async (req, res) => {
             console.error("Async email dispatch error:", err.message);
         });
 
-        // Always include devOtp in development / demo mode so verification never blocks
         const isProdConfigured = Boolean(process.env.EMAIL_USER && process.env.EMAIL_PASS);
 
         return res.status(201).json({
             success: true,
-            message: isProdConfigured
-                ? "Registration successful! A verification code has been sent to your email."
-                : `Registration successful! Verification code: ${otp}`,
+            message: "Registration successful! A verification code has been sent to your email.",
             email: normalizedEmail,
-            devOtp: otp
+            // Only expose devOtp in local development when SMTP is unconfigured
+            ...(process.env.NODE_ENV === "development" && !isProdConfigured ? { devOtp: otp } : {})
         });
 
     } catch (error) {

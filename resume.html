@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Soumojit Basu - Resume</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&family=Open+Sans:wght@400;500;600;700&display=swap');
+
+  @page {
+    size: A4;
+    margin: 12mm 15mm 12mm 15mm;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Open Sans', Calibri, Arial, sans-serif;
+    color: #1a1a1a;
+    line-height: 1.35;
+    font-size: 9.6pt;
+    background: #ffffff;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  .header h1 {
+    font-family: 'Merriweather', Georgia, serif;
+    font-size: 20pt;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #111827;
+    margin-bottom: 2px;
+    text-transform: uppercase;
+  }
+
+  .header .location {
+    font-size: 9.5pt;
+    color: #374151;
+    margin-bottom: 3px;
+  }
+
+  .header .contact-links {
+    font-size: 9pt;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+    color: #374151;
+  }
+
+  .header a {
+    color: #0044cc;
+    text-decoration: underline;
+  }
+
+  /* Section Title */
+  .section-title {
+    font-family: 'Merriweather', Georgia, serif;
+    font-size: 11.5pt;
+    font-weight: 700;
+    color: #111827;
+    border-bottom: 1.2px solid #374151;
+    padding-bottom: 1.5px;
+    margin-top: 7px;
+    margin-bottom: 5px;
+  }
+
+  /* Items */
+  .item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 1.5px;
+  }
+
+  .item-title {
+    font-size: 10pt;
+    font-weight: 700;
+    color: #111827;
+  }
+
+  .item-date, .item-location {
+    font-size: 9pt;
+    font-weight: 600;
+    color: #374151;
+    font-style: italic;
+  }
+
+  .item-subtitle {
+    font-size: 9.2pt;
+    font-style: italic;
+    color: #374151;
+    margin-bottom: 3px;
+  }
+
+  .project-tech {
+    font-weight: 400;
+    font-style: italic;
+    color: #4b5563;
+    font-size: 9pt;
+  }
+
+  .project-links {
+    font-size: 8.5pt;
+    margin-bottom: 3px;
+  }
+
+  .project-links a {
+    color: #0044cc;
+    text-decoration: underline;
+    font-weight: 600;
+    margin-right: 8px;
+  }
+
+  /* Bullet Points */
+  ul {
+    list-style-type: disc;
+    margin-left: 16px;
+    margin-bottom: 5px;
+  }
+
+  li {
+    margin-bottom: 2.5px;
+    font-size: 9.1pt;
+    text-align: justify;
+  }
+
+  li strong {
+    color: #111827;
+  }
+
+  /* Skills Table */
+  .skills-row {
+    display: flex;
+    font-size: 9.1pt;
+    margin-bottom: 3px;
+  }
+
+  .skills-label {
+    font-weight: 700;
+    width: 140px;
+    flex-shrink: 0;
+    color: #111827;
+  }
+
+  .skills-content {
+    color: #374151;
+  }
+
+  .profile-links-list {
+    display: flex;
+    gap: 24px;
+    margin-left: 16px;
+    font-size: 9pt;
+  }
+
+  .profile-links-list a {
+    color: #0044cc;
+    text-decoration: underline;
+  }
+</style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <h1>SOUMOJIT BASU</h1>
+    <div class="location">Kolkata, West Bengal, India</div>
+    <div class="contact-links">
+      <span>📞 +91 9749927728</span>
+      <span>✉️ <a href="mailto:soumojitbasu2@gmail.com">soumojitbasu2@gmail.com</a></span>
+      <span>🔗 <a href="https://linkedin.com/in/soumojitbasu2003" target="_blank">linkedin.com/in/soumojitbasu2003</a></span>
+      <span>🐙 <a href="https://github.com/soumojitbasu" target="_blank">github.com/soumojitbasu</a></span>
+    </div>
+  </div>
+
+  <!-- Education -->
+  <div class="section-title">Education</div>
+  <div class="item-header">
+    <div class="item-title">Jadavpur University</div>
+    <div class="item-date">Oct 2023 – Jun 2027</div>
+  </div>
+  <div class="item-header">
+    <div class="item-subtitle">Bachelor of Engineering, Information Technology (SGPA: 8.10 / 10.0)</div>
+    <div class="item-location">Kolkata, West Bengal</div>
+  </div>
+  <ul>
+    <li><strong>Coursework:</strong> Data Structures & Algorithms, Object-Oriented Programming, Database Management Systems (DBMS), Computer Organisation & Architecture, Operating Systems, Computer Networks.</li>
+  </ul>
+
+  <!-- Projects -->
+  <div class="section-title">Projects</div>
+
+  <!-- Project 1: SyncForge -->
+  <div class="item-header">
+    <div class="item-title">SyncForge — Real-Time Collaborative Coding Platform <span class="project-tech">| React 19, Monaco, Node.js, Express, Socket.IO, MongoDB, Docker</span></div>
+  </div>
+  <div class="project-links">
+    <a href="https://syncforge-basu3.vercel.app" target="_blank">🌐 Live Demo</a> | 
+    <a href="https://github.com/soumojitbasu/Collaborative-Coding-Platform" target="_blank">🐙 GitHub Repository</a>
+  </div>
+  <ul>
+    <li>Architected a multi-user collaborative IDE with sub-50ms code synchronization, dynamic remote cursor tracking, participant color-tagging, and real-time in-room chat via Socket.IO & WebSockets.</li>
+    <li>Engineered an isolated multi-language code execution engine supporting 8+ runtimes (C++, Python 3.12, Java, JavaScript) with real-time synchronized terminal STDIN & STDOUT streams across peers.</li>
+    <li>Designed a LeetCode-style 2D resizable workspace layout using <code>react-resizable-panels</code> with dynamic Monaco Editor reflow for fluid split-screen pair programming.</li>
+    <li>Hardened production security with SHA-256 password resets, cryptographic OTP verification, multi-tier rate limiting (express-rate-limit), and a 60s WebSocket disconnect recovery window.</li>
+    <li>Containerized application with multi-stage Docker builds and automated GitHub CI/CD pipelines deploying frontend to Vercel and backend API to Render.</li>
+  </ul>
+
+  <!-- Project 2: Movie Recommendation System -->
+  <div class="item-header">
+    <div class="item-title">Movie Recommendation System <span class="project-tech">| Python, Scikit-learn, Pandas, NumPy, Streamlit, TMDB API</span></div>
+  </div>
+  <ul>
+    <li>Engineered a content-based filtering engine using TF-IDF vectorization & cosine similarity on the TMDB dataset — processes genres, cast, crew, and keywords to deliver top-5 personalized movie recommendations.</li>
+    <li>Designed a multi-field feature engineering pipeline with Pandas & NumPy, fusing heterogeneous metadata into a single weighted feature vector to maximize recommendation precision.</li>
+    <li>Integrated the TMDB REST API for real-time poster retrieval in a Streamlit UI; deployed on Streamlit Cloud with GitHub CI/CD for automated redeployment on every push.</li>
+  </ul>
+
+  <!-- Achievements -->
+  <div class="section-title">Achievements</div>
+  <ul>
+    <li><strong>Meta Hacker Cup 2025 – Round 2 Qualifier:</strong> Advanced to Round 2, competing against tens of thousands of global participants in one of the world's most prestigious algorithmic programming contests.</li>
+    <li><strong>H42 Competitive Programming – Finalist, 6th Place:</strong> Reached the Finals of H42 at Jadavpur University, placing 6th among all university-level participants.</li>
+    <li><strong>Competitive Programming:</strong> Solved 400+ problems across LeetCode & Codeforces with consistent participation in rated contests, focusing on advanced Data Structures & Algorithms in C++.</li>
+  </ul>
+
+  <!-- Profile Links -->
+  <div class="section-title">Profile Links</div>
+  <div class="profile-links-list">
+    <span>• <strong>LinkedIn:</strong> <a href="https://linkedin.com/in/soumojitbasu2003" target="_blank">linkedin.com/in/soumojitbasu2003</a></span>
+    <span>• <strong>GitHub:</strong> <a href="https://github.com/soumojitbasu" target="_blank">github.com/soumojitbasu</a></span>
+    <span>• <strong>LeetCode:</strong> <a href="https://leetcode.com/u/soumojitbasu/" target="_blank">leetcode.com/u/soumojitbasu</a></span>
+    <span>• <strong>Codeforces:</strong> <a href="https://codeforces.com/profile/soumojitbasu" target="_blank">codeforces.com/profile/soumojitbasu</a></span>
+  </div>
+
+  <!-- Technical Skills -->
+  <div class="section-title">Technical Skills</div>
+  <div class="skills-row">
+    <div class="skills-label">Languages:</div>
+    <div class="skills-content">C++, Python, Java, JavaScript (ES6+), SQL, HTML5, CSS3</div>
+  </div>
+  <div class="skills-row">
+    <div class="skills-label">Frameworks & Tools:</div>
+    <div class="skills-content">React.js (v19), Node.js, Express.js, Socket.IO, Monaco Editor, MongoDB, Mongoose, REST APIs, Vite</div>
+  </div>
+  <div class="skills-row">
+    <div class="skills-label">DevOps & Cloud:</div>
+    <div class="skills-content">Docker, Docker Compose, Git, GitHub, Vercel, Render, Nginx, Linux/Bash</div>
+  </div>
+
+</body>
+</html>
