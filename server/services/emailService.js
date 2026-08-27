@@ -1,4 +1,10 @@
+const dns = require("dns");
 const nodemailer = require("nodemailer");
+
+// Force IPv4 first to prevent ENETUNREACH on cloud providers like Render that do not support IPv6 outbound
+if (dns.setDefaultResultOrder) {
+    dns.setDefaultResultOrder("ipv4first");
+}
 
 let transporter = null;
 
@@ -15,6 +21,7 @@ const initTransporter = () => {
                 user: cleanUser,
                 pass: cleanPass
             },
+            family: 4, // Force IPv4 to eliminate IPv6 network unreachable errors
             tls: {
                 rejectUnauthorized: false
             },
