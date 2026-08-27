@@ -109,15 +109,21 @@ const registerController = async (req, res) => {
         </html>
         `;
 
-        // Dispatch Email Asynchronously
-        sendEmail(
+        // Dispatch Email Synchronously to ensure delivery before completing request
+        const emailResult = await sendEmail(
             normalizedEmail,
-            "Verify Your CodeSync Account",
+            "Verify Your SyncForge Account",
             textContent,
             htmlContent
-        ).catch((err) => {
-            console.error("Async email dispatch error:", err.message);
-        });
+        );
+
+        if (!emailResult.success) {
+            if (emailResult.simulated) {
+                console.warn(`⚠️ [EMAIL NOTICE] Verification email for ${normalizedEmail} was simulated.`);
+            } else {
+                console.error(`⚠️ [EMAIL ERROR] Failed to send verification email to ${normalizedEmail}:`, emailResult.error);
+            }
+        }
 
         const isProdConfigured = Boolean(process.env.EMAIL_USER && process.env.EMAIL_PASS);
 

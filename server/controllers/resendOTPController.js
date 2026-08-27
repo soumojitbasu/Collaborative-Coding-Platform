@@ -87,18 +87,27 @@ const resendOTPController = async (req, res) => {
         </html>
         `;
 
-        sendEmail(
+        const emailResult = await sendEmail(
             normalizedEmail,
-            "Your CodeSync Verification Code",
+            "Your SyncForge Verification Code",
             textContent,
             htmlContent
-        ).catch((err) => {
-            console.error("Async email dispatch error:", err.message);
-        });
+        );
+
+        if (!emailResult.success) {
+            if (emailResult.simulated) {
+                console.warn(`⚠️ [EMAIL NOTICE] Resent verification email for ${normalizedEmail} was simulated.`);
+            } else {
+                console.error(`⚠️ [EMAIL ERROR] Failed to resend verification email to ${normalizedEmail}:`, emailResult.error);
+            }
+        }
+
+        const isProdConfigured = Boolean(process.env.EMAIL_USER && process.env.EMAIL_PASS);
 
         return res.status(200).json({
             success: true,
-            message: "A new verification code has been dispatched to your email."
+            message: "A new verification code has been dispatched to your email.",
+            ...(process.env.NODE_ENV === "development" && !isProdConfigured ? { devOtp: otp } : {})
         });
 
     } catch (error) {

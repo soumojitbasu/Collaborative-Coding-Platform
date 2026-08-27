@@ -21,6 +21,9 @@ const { notFoundHandler, errorHandler } = require("./middleware/errorMiddleware"
 const app = express();
 const server = http.createServer(app);
 
+// Enable trust proxy for correct client IP detection behind Render, Vercel, Nginx, or Cloudflare
+app.set("trust proxy", 1);
+
 const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
 
 // 1. Security Headers & CORS

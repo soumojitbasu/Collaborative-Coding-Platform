@@ -8,14 +8,19 @@ const initTransporter = () => {
         const cleanUser = process.env.EMAIL_USER.trim();
 
         transporter = nodemailer.createTransport({
-            service: "gmail",
+            host: "smtp.gmail.com",
+            port: 465,
+            secure: true,
             auth: {
                 user: cleanUser,
                 pass: cleanPass
             },
-            connectionTimeout: 10000,
-            greetingTimeout: 10000,
-            socketTimeout: 15000
+            tls: {
+                rejectUnauthorized: false
+            },
+            connectionTimeout: 15000,
+            greetingTimeout: 15000,
+            socketTimeout: 20000
         });
     }
 };
@@ -35,13 +40,13 @@ const sendEmail = async (to, subject, text, html = null) => {
 
     if (!transporter) {
         console.warn(`[EMAIL NOTICE] EMAIL_USER / EMAIL_PASS not configured in environment.`);
-        return { messageId: "simulated-" + Date.now() };
+        return { success: false, simulated: true, messageId: "simulated-" + Date.now() };
     }
 
     try {
         const cleanUser = process.env.EMAIL_USER.trim();
         const mailOptions = {
-            from: `"CodeSync Support" <${cleanUser}>`,
+            from: `"SyncForge Support" <${cleanUser}>`,
             to: to.trim(),
             subject: subject.trim(),
             text: text,
@@ -50,10 +55,10 @@ const sendEmail = async (to, subject, text, html = null) => {
 
         const info = await transporter.sendMail(mailOptions);
         console.log(`✅ Email delivered successfully to ${to} (Message ID: ${info.messageId})`);
-        return info;
+        return { success: true, ...info };
     } catch (err) {
         console.error(`⚠️ Email delivery failed for ${to}:`, err.message);
-        return { error: err.message };
+        return { success: false, error: err.message };
     }
 };
 

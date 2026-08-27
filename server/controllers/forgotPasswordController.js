@@ -34,10 +34,11 @@ const forgotPasswordController = async (req, res) => {
         user.resetTokenExpires = new Date(Date.now() + 15 * 60 * 1000);
         await user.save();
 
-        const clientUrl = process.env.CLIENT_URL || "https://syncforge-basu3.vercel.app";
+        const rawClientUrl = process.env.CLIENT_URL || "https://syncforge-basu3.vercel.app";
+        const clientUrl = rawClientUrl.replace(/\/+$/, "");
         const resetLink = `${clientUrl}/reset-password?token=${resetToken}`;
 
-        const textContent = `Hello,\n\nYou requested a password reset for your CodeSync account.\n\nPlease click the link below to set a new password:\n\n${resetLink}\n\nThis link is valid for 15 minutes.\n\nIf you did not request this password reset, you can safely ignore this email.`;
+        const textContent = `Hello,\n\nYou requested a password reset for your SyncForge account.\n\nPlease click the link below to set a new password:\n\n${resetLink}\n\nThis link is valid for 15 minutes.\n\nIf you did not request this password reset, you can safely ignore this email.`;
 
         const htmlContent = `
         <!DOCTYPE html>
@@ -48,12 +49,12 @@ const forgotPasswordController = async (req, res) => {
         <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; padding: 24px;">
             <div style="max-width: 480px; margin: 0 auto; background-color: #1e293b; border-radius: 12px; border: 1px solid #334155; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
                 <div style="background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); padding: 24px; text-align: center;">
-                    <h1 style="margin: 0; color: #ffffff; font-size: 22px; font-weight: 700; letter-spacing: 0.5px;">&lt;/&gt; CodeSync</h1>
+                    <h1 style="margin: 0; color: #ffffff; font-size: 22px; font-weight: 700; letter-spacing: 0.5px;">&lt;/&gt; SyncForge</h1>
                 </div>
                 <div style="padding: 28px 24px; text-align: center;">
                     <h2 style="margin: 0 0 12px 0; color: #f8fafc; font-size: 18px;">Password Reset Request</h2>
                     <p style="font-size: 14px; line-height: 1.6; color: #cbd5e1; margin: 0 0 24px 0;">
-                        You recently requested to reset your password for your CodeSync account. Click the button below to choose a new password:
+                        You recently requested to reset your password for your SyncForge account. Click the button below to choose a new password:
                     </p>
                     <a href="${resetLink}" style="display: inline-block; background: #6366f1; color: #ffffff; font-weight: 600; font-size: 15px; padding: 12px 28px; border-radius: 8px; text-decoration: none; box-shadow: 0 4px 12px rgba(99,102,241,0.4);">Reset Password</a>
                     <p style="font-size: 12px; color: #94a3b8; margin: 24px 0 0 0;">
@@ -61,21 +62,27 @@ const forgotPasswordController = async (req, res) => {
                     </p>
                 </div>
                 <div style="padding: 16px 24px; background-color: #0f172a; border-top: 1px solid #334155; text-align: center; font-size: 11px; color: #64748b;">
-                    &copy; ${new Date().getFullYear()} CodeSync Collaborative IDE. All rights reserved.
+                    &copy; ${new Date().getFullYear()} SyncForge Collaborative IDE. All rights reserved.
                 </div>
             </div>
         </body>
         </html>
         `;
 
-        sendEmail(
+        const emailResult = await sendEmail(
             normalizedEmail,
-            "Password Reset Request — CodeSync",
+            "Password Reset Request — SyncForge",
             textContent,
             htmlContent
-        ).catch((emailErr) => {
-            console.error("Failed to send reset email:", emailErr.message);
-        });
+        );
+
+        if (!emailResult.success) {
+            if (emailResult.simulated) {
+                console.warn(`⚠️ [EMAIL NOTICE] Password reset email for ${normalizedEmail} was simulated.`);
+            } else {
+                console.error(`⚠️ [EMAIL ERROR] Failed to send password reset email to ${normalizedEmail}:`, emailResult.error);
+            }
+        }
 
         return res.status(200).json({
             success: true,
