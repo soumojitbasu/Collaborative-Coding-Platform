@@ -106,8 +106,10 @@ const resendOTPController = async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            message: "A new verification code has been dispatched to your email.",
-            ...(process.env.NODE_ENV === "development" && !isProdConfigured ? { devOtp: otp } : {})
+            message: isProdConfigured && emailResult.success
+                ? "A new verification code has been dispatched to your email."
+                : "A new verification code has been generated.",
+            ...(!isProdConfigured || emailResult.simulated ? { devOtp: otp } : {})
         });
 
     } catch (error) {

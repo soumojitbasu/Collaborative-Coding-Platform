@@ -9,7 +9,7 @@ function VerifyOTPForm() {
     const { success, error: showError } = useToast();
 
     const [email, setEmail] = useState(location.state?.email || "");
-    const [otp, setOTP] = useState("");
+    const [otp, setOTP] = useState(location.state?.devOtp || "");
     const [loading, setLoading] = useState(false);
     const [resending, setResending] = useState(false);
     const [cooldown, setCooldown] = useState(0);
@@ -59,6 +59,9 @@ function VerifyOTPForm() {
 
         try {
             const data = await resendOTP({ email: email.trim() });
+            if (data.devOtp) {
+                setOTP(data.devOtp);
+            }
             success(data.message || "A fresh verification code has been sent to your email!");
             setCooldown(30);
         } catch (err) {

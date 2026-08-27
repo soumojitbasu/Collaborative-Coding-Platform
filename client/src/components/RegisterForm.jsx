@@ -47,7 +47,8 @@ function RegisterForm() {
 
             navigate("/verify-otp", {
                 state: {
-                    email: formData.email
+                    email: formData.email,
+                    devOtp: data.devOtp
                 }
             });
         } catch (err) {

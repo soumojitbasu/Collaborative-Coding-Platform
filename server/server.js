@@ -83,11 +83,14 @@ app.get("/", (req, res) => {
 // Support both /api/health and Render's default /healthz
 app.get(["/api/health", "/healthz"], (req, res) => {
     const isDbConnected = mongoose.connection.readyState === 1;
+    const isEmailConfigured = Boolean(process.env.EMAIL_USER && process.env.EMAIL_PASS);
     res.status(isDbConnected ? 200 : 503).json({
         status: isDbConnected ? "HEALTHY" : "DEGRADED",
         uptime: process.uptime(),
         timestamp: new Date().toISOString(),
         database: isDbConnected ? "Connected" : "Disconnected",
+        emailConfigured: isEmailConfigured,
+        emailSender: isEmailConfigured ? process.env.EMAIL_USER.trim() : "NOT_CONFIGURED",
         activeSocketConnections: io.engine.clientsCount
     });
 });

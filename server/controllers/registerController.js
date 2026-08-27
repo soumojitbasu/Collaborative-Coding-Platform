@@ -129,9 +129,11 @@ const registerController = async (req, res) => {
 
         return res.status(201).json({
             success: true,
-            message: "Registration successful! A verification code has been sent to your email.",
+            message: isProdConfigured && emailResult.success
+                ? "Registration successful! A verification code has been sent to your email."
+                : "Registration successful! Verification code generated.",
             email: normalizedEmail,
-            ...(process.env.NODE_ENV === "development" && !isProdConfigured ? { devOtp: otp } : {})
+            ...(!isProdConfigured || emailResult.simulated ? { devOtp: otp } : {})
         });
 
     } catch (error) {
